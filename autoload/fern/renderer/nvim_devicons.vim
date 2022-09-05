@@ -81,10 +81,14 @@ function! s:render_node(node, base, options) abort
   return leading . symbol . a:node.label . suffix . '' . a:node.badge
 endfunction
 
+" luaeval('nil') behavior was changed to return v:null instead of 'null'
+" since this patch: https://github.com/neovim/neovim/pull/16730
+const s:luanil = (luaeval('nil') ==# v:null ? v:null : 'null')
+
 function! s:get_node_symbol(node, options) abort
   if a:node.status is# s:STATUS_NONE
     let symbol = a:options.leaf_symbol . luaeval("require'nvim-web-devicons'.get_icon(_A[1], _A[2])",[a:node.label, fnamemodify(a:node.bufname, ":e")])
-    if symbol == 'null'
+    if symbol ==# s:luanil
       let symbol = ''
     endif
   elseif a:node.status is# s:STATUS_COLLAPSED
